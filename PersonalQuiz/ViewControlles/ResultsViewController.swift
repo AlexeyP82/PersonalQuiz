@@ -10,68 +10,58 @@ import UIKit
 
 class ResultsViewController: UIViewController {
   
-  // 2. Определить наиболее часто встречающийся тип животного
-  
   @IBOutlet weak var animalLabel: UILabel!
   @IBOutlet weak var descriptionLabel: UILabel!
   
   var answers: [Answer]!
   
-  private var animalTypeCounts = [AnimalType.dog: 0,
-                     AnimalType.cat: 0,
-                     AnimalType.rabbit: 0,
-                     AnimalType.turtle: 0]
+  private var animalTypeCounts = [AnimalType: Int]()
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
     navigationItem.hidesBackButton = true
     
-    calculateAnimalTypes()
+    prepareForResultDefinition()
     
-    let result = answerDefinition()
-    
-    animalLabel.text = "Вы - \(result.rawValue)"
-    descriptionLabel.text = result.definition
-  }
-  
-  private func answerDefinition() -> AnimalType {
-    var animal = AnimalType.dog
-    var animalCount = 0
-    
-    for pet in animalTypeCounts {
-      if pet.value > animalCount {
-        animal = pet.key
-        animalCount = pet.value
-      }
+    if let result = answerDefinition() {
+      animalLabel.text = "Вы - \(result.rawValue)"
+      descriptionLabel.text = result.definition
+    } else {
+      animalLabel.text = ""
+      descriptionLabel.text = ""
     }
-    
-    return animal
   }
   
-  private func calculateAnimalTypes() {
+  private func prepareForResultDefinition() {
     for answer in answers {
-      switch answer.type {
-      case .dog:
-        increaseCount(for: .dog)
-      case .cat:
-        increaseCount(for: .cat)
-      case .rabbit:
-        increaseCount(for: .rabbit)
-      case .turtle:
-        increaseCount(for: .turtle)
+      if animalTypeCounts[answer.type] != nil {
+        animalTypeCounts[answer.type]! += 1
+      } else {
+        animalTypeCounts[answer.type] = 1
       }
     }
   }
   
-  private func increaseCount(for animal: AnimalType) {
-    if animalTypeCounts[animal] != nil {
-      animalTypeCounts[animal]! += 1
+  private func answerDefinition() -> AnimalType? {
+    if !animalTypeCounts.isEmpty {
+      var animal = animalTypeCounts.first!.key
+      var animalCount = animalTypeCounts.first?.value
+      
+      for pet in animalTypeCounts {
+        if pet.value > animalCount! {
+          animal = pet.key
+          animalCount = pet.value
+        }
+      }
+      
+      return animal
+    } else {
+      return nil
     }
   }
   
   deinit {
-    print("ResultsViewController has been dealocated")
+      print("ResultViewController has been dealocated")
   }
-  
 }
